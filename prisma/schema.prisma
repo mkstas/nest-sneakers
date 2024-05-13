@@ -29,24 +29,24 @@ enum ClientStatus {
   banned
 }
 
-model Product {
+model Good {
   id        Int      @id @default(autoincrement())
   title     String
-  imageUrl  String   @map("image_url")
+  image     String
   price     Int
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   orders    Order[]
 
-  @@map("products")
+  @@map("goods")
 }
 
 model Order {
   id        Int         @id @default(autoincrement())
   client    Client      @relation(fields: [clientId], references: [id])
-  clientId  Int         @unique
-  product   Product     @relation(fields: [productId], references: [id])
-  productId Int         @unique
+  clientId  Int         @unique @map("client_id")
+  good      Good        @relation(fields: [goodId], references: [id])
+  goodId    Int         @unique @map("good_id")
   status    OrderStatus
   createdAt DateTime    @default(now()) @map("created_at")
   updatedAt DateTime    @updatedAt @map("updated_at")
