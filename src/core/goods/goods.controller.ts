@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -26,12 +27,13 @@ export class GoodsController {
   }
 
   @Get()
-  getAll() {
+  findAll(@Query() query: string) {
+    if (query.search) return this.goodsService.findBySearch(query.search);
     return this.goodsService.findAll();
   }
 
   @Get(':id')
-  getOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.goodsService.findOne(id);
   }
 

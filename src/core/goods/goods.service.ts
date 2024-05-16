@@ -31,6 +31,14 @@ export class GoodsService {
     return good;
   }
 
+  async findBySearch(searchString: any) {
+    const goods = await this.prismaService.good.findMany({
+      where: { title: { mode: 'insensitive', contains: searchString } },
+    });
+    if (goods.length < 1) throw new NotFoundException();
+    return goods;
+  }
+
   async update(id: number, dto: UpdateGoodDto, image: Express.Multer.File) {
     const good = await this.findOne(id);
     let data = {};
