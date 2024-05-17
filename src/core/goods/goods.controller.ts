@@ -15,19 +15,20 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { GoodsService } from './goods.service';
 import { CreateGoodDto } from './dto/create-good.dto';
 import { UpdateGoodDto } from './dto/update-good.dto';
+import { imageStorage } from 'src/storages/image-storage';
 
 @Controller('goods')
 export class GoodsController {
   constructor(private readonly goodsService: GoodsService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('image', { storage: imageStorage }))
   create(@Body() dto: CreateGoodDto, @UploadedFile() image: Express.Multer.File) {
     return this.goodsService.create(dto, image);
   }
 
   @Get()
-  findAll(@Query() query: string) {
+  findAll(@Query() query: { search: string }) {
     if (query.search) return this.goodsService.findBySearch(query.search);
     return this.goodsService.findAll();
   }
@@ -38,7 +39,7 @@ export class GoodsController {
   }
 
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('image', { storage: imageStorage }))
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateGoodDto,
