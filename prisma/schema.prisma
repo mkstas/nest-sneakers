@@ -16,7 +16,7 @@ datasource db {
 model Client {
   id          Int          @id @default(autoincrement())
   phoneNumber String       @map("phone_number")
-  status      ClientStatus
+  status      ClientStatus @default(active)
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
   orders      Order[]
@@ -30,32 +30,47 @@ enum ClientStatus {
 }
 
 model Good {
-  id        Int      @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   title     String
   image     String
   price     Int
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  orders    Order[]
+  status    GoodStatus  @default(active)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  orderGood OrderGood[]
 
   @@map("goods")
+}
+
+enum GoodStatus {
+  active
+  hidden
 }
 
 model Order {
   id        Int         @id @default(autoincrement())
   client    Client      @relation(fields: [clientId], references: [id])
-  clientId  Int         @unique @map("client_id")
-  good      Good        @relation(fields: [goodId], references: [id])
-  goodId    Int         @unique @map("good_id")
-  status    OrderStatus
+  clientId  Int         @map("client_id")
+  status    OrderStatus @default(active)
   createdAt DateTime    @default(now()) @map("created_at")
   updatedAt DateTime    @updatedAt @map("updated_at")
+  orderGood OrderGood[]
 
   @@map("orders")
 }
 
 enum OrderStatus {
   active
-  recieved
+  received
   rejected
+}
+
+model OrderGood {
+  order      Order    @relation(fields: [orderId], references: [id])
+  orderId    Int
+  good       Good     @relation(fields: [goodId], references: [id])
+  goodId     Int
+  assignedAt DateTime @default(now()) @map("assigned_at")
+
+  @@id([orderId, goodId])
 }
