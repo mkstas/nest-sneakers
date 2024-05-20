@@ -48,13 +48,14 @@ enum GoodStatus {
 }
 
 model Order {
-  id        Int         @id @default(autoincrement())
-  client    Client      @relation(fields: [clientId], references: [id])
-  clientId  Int         @map("client_id")
-  status    OrderStatus @default(active)
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
-  orderGood OrderGood[]
+  id          Int         @id @default(autoincrement())
+  client      Client      @relation(fields: [clientId], references: [id])
+  clientId    Int         @map("client_id")
+  orderNumber String      @map("order_number")
+  status      OrderStatus @default(active)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  orderGood   OrderGood[]
 
   @@map("orders")
 }
