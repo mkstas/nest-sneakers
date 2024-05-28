@@ -15,7 +15,8 @@ export class OrdersService {
     const client = await this.clientsService.create({ phoneNumber: dto.phoneNumber });
 
     const date = new Date();
-    const orderNumber = `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}/${uuid.v4().slice(-4)}-${client.id}`;
+    const orderNumber =
+      `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}/${uuid.v4().slice(-4)}-${client.id}`.toUpperCase();
 
     const order = await this.prismaService.order.create({
       data: {
