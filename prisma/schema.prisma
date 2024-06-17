@@ -13,60 +13,117 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Client {
-  id          Int          @id @default(autoincrement())
-  phoneNumber String       @map("phone_number")
-  status      ClientStatus @default(active)
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
-  orders      Order[]
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         UserRoles
+  isBanned     Boolean   @default(false)
+  banReason    String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  token        Token?
+  profile      Profile?
+  order        Order[]
 
-  @@map("clients")
+  @@map("users")
 }
 
-enum ClientStatus {
-  active
-  banned
+enum UserRoles {
+  admin
+  moderator
+  client
+}
+
+model Token {
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       Int      @unique
+  refreshToken String   @map("refresh_token")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("tokens")
+}
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int      @unique
+  firstName String   @map("first_name")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("profiles")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  title     String
+  isShowing Boolean  @default(true) @map("is_showing")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  goods     Good[]
+
+  @@map("categories")
 }
 
 model Good {
-  id        Int         @id @default(autoincrement())
-  title     String
-  image     String
-  price     Int
-  status    GoodStatus  @default(active)
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
-  orderGood OrderGood[]
+  id          Int           @id @default(autoincrement())
+  category    Category      @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  title       String
+  image       String
+  price       Int
+  quantity    Int           @default(1)
+  isShowing   Boolean       @default(true) @map("is_showing")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  orderOnGood OrderOnGood[]
+  favourites  Favourite[]
+  cart        Cart[]
 
   @@map("goods")
 }
 
-enum GoodStatus {
-  active
-  hidden
+model Favourite {
+  id         Int      @id @default(autoincrement())
+  good       Good     @relation(fields: [goodId], references: [id])
+  goodId     Int
+  assignedAt DateTime @default(now()) @map("assigned_at")
+
+  @@map("favourites")
+}
+
+model Cart {
+  id         Int      @id @default(autoincrement())
+  good       Good     @relation(fields: [goodId], references: [id])
+  goodId     Int
+  assignedAt DateTime @default(now()) @map("assigned_at")
+
+  @@map("cart")
 }
 
 model Order {
-  id          Int         @id @default(autoincrement())
-  client      Client      @relation(fields: [clientId], references: [id])
-  clientId    Int         @map("client_id")
-  orderNumber String      @map("order_number")
-  status      OrderStatus @default(active)
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
-  orderGood   OrderGood[]
+  id          Int           @id @default(autoincrement())
+  user        User?         @relation(fields: [userId], references: [id])
+  userId      Int?
+  phoneNumber String        @map("phone_number")
+  status      OrderStatus
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  orderOnGood OrderOnGood[]
 
   @@map("orders")
 }
 
 enum OrderStatus {
-  active
+  awaiting
   received
   rejected
 }
 
-model OrderGood {
+model OrderOnGood {
   order      Order    @relation(fields: [orderId], references: [id])
   orderId    Int
   good       Good     @relation(fields: [goodId], references: [id])
